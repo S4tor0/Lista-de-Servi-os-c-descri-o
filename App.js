@@ -111,7 +111,7 @@ function App()
               ) : (
                 <>
                   <strong>Serviço: </strong> {item.service}<br/>
-                  <strong>Descrição: </strong> {item.description}
+                  <strong>Descrição: </strong> <p>{item.description} </p> 
                   <button onClick={() => removeInfo(index)}>Remover</button>
                     {editIndex === index ? (
                       <button onClick={() => confirmEdit(index)}>Confirmar</button>  
