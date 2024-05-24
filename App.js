@@ -1,128 +1,198 @@
-//Desenvolvimento de Aplicações Moveis
-//121
-//Erick Santos Brito  - 2021200278
+/*
+  Materia: Desenvolvimento de Aplicações Moveis
+  Turma: 121
+  Nome: Erick Santos Brito - 2021200278
+*/ 
 
-import { useState } from "react";
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
 
-function App()
-{
-  //criando o estado para os serviços de para as descrições
-  const [service,setServs] = useState('');
-  const [description,setDescription] = useState('');
-  const [lista,setLista] = useState([]);
+function App() {
+  // State para o novo serviço e descrição
+  const [service, setService] = useState("");
+  const [description, setDescription] = useState("");
+  // State para armazenar a lista de itens
+  const [lista, setLista] = useState([]);
+  // State para rastrear o índice do item sendo editado
   const [editIndex, setEditIndex] = useState(null);
-  const [editService, setEditService] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  // States para os campos editáveis ​​do item atualmente sendo editado
+  const [editService, setEditService] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editStatus, setEditStatus] = useState("incompleto");
 
-//cadastro do serviço
-  const handleServices = (event) => 
-  {
-    //checa se o serviço que está sendo adicionado não é vazio
-    if (event.target.value.trim() !== '') 
-    {
-      setServs(event.target.value); 
-    }
-  }
-//cadastro da descrição
-  const handleDescription = (event) =>
-  {
-    if (event.target.value.trim() !== '')
-    {
-      setDescription(event.target.value); 
-    }
-  }
-//adiciona o cadastro do serviço e da descrição a lista
-  const handleInfo = () =>
-  {
-    setLista([...lista,{service,description}]);
-    setServs('');
-    setDescription('');
-  }
-//remoção do cadastro da lista
-  const removeInfo = (index) =>
-  {
-    const newLista = lista.filter((item,i) => i !== index)
+  // Função para lidar com a alteração do serviço
+  const handleServiceChange = (event) => {
+    setService(event.target.value);
+  };
+
+  // Função para lidar com a alteração da descrição
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value);
+  };
+
+  // Função para lidar com a alteração do status de edição
+  const handleStatusChange = (event) => {
+    setEditStatus(event.target.value);
+  };
+
+  // Função para adicionar um novo item à lista
+  const addInfo = () => {
+    if (service.trim() === "" || description.trim() === "") return;
+    const newItem = {
+      service,
+      description,
+      status: "incompleto",
+      expanded: false,
+    };
+    setLista([...lista, newItem]);
+    setService("");
+    setDescription("");
+  };
+
+  // Função para remover um item da lista
+  const removeInfo = (index) => {
+    const newLista = [...lista];
+    newLista.splice(index, 1);
     setLista(newLista);
-  }
+  };
 
-//editar a lista
-  const editInfo = (index) =>
-  {
-    //define o valor com base no item da lista
-    const currentItem = lista[index]
+  // Função para editar um item da lista
+  const editInfo = (index) => {
+    const currentItem = lista[index];
+    setEditIndex(index);
     setEditService(currentItem.service);
     setEditDescription(currentItem.description);
-    setEditIndex(index);
-  }
+    setEditStatus(currentItem.status);
+  };
 
-  const confirmEdit = () =>
-  {
-    const newLista = [...lista];
-    newLista[editIndex] = {service: editService, description: editDescription};
+  // Função para confirmar a edição de um item
+  const confirmEdit = () => {
+    const newLista = lista.map((item, index) => {
+      if (index === editIndex) {
+        return {
+          ...item,
+          service: editService,
+          description: editDescription,
+          status: editStatus,
+        };
+      }
+      return item;
+    });
     setLista(newLista);
     setEditIndex(null);
-    setEditService('');
-    setEditDescription('');
-  }
+    setEditService("");
+    setEditDescription("");
+    setEditStatus("incompleto");
+  };
 
-  return(
+  // Função para alternar a exibição da descrição do item
+  const toggleDescription = (index) => {
+    const newLista = [...lista];
+    newLista[index].expanded = !newLista[index].expanded;
+    setLista(newLista);
+  };
+
+  return (
     <div className="App">
       <h1>Serviços</h1>
-      <div className="Conteiner">
-        <label>Serviço: </label>
-        <input 
-          type="text" 
-          value={service} 
-          onChange={handleServices} 
+      <div className="Container">
+        <label htmlFor="service">Serviço:</label>
+        <input
+          type="text"
+          id="service"
+          value={service}
+          onChange={handleServiceChange}
           placeholder="Digite um serviço"
         />
-        <br></br>
-        <label>Descrição: </label>
-        <input 
-          type="text" 
-          value={description} 
-          onChange={handleDescription}
+        <br />
+        <label htmlFor="description">Descrição:</label>
+        <input
+          type="text"
+          id="description"
+          value={description}
+          onChange={handleDescriptionChange}
           placeholder="Digite uma descrição"
         />
-        <br></br>
-        <button onClick={handleInfo} >Adicionar</button>
-        </div>
+        <br />
+        <button onClick={addInfo}>Adicionar</button>
+      </div>
 
-        <ul>
-          {lista.map((item, index) => (
-            <li key={index}>
-              {editIndex === index ? (
-                <>
-                  <input
-                    type="text"
-                    value={editService}
-                    onChange={(e) => setEditService(e.target.value)}
-                  />
-                  <textarea 
-                    type="text" 
-                    style={{ width: 'auto', height: 'auto' }} 
-                    value={editDescription} 
-                    onChange={(e) => setEditDescription(e.target.value)} 
-                  />
-
-                  <button onClick={confirmEdit}>Confirmar</button>
-                </>
-              ) : (
-                <>
-                  <strong>Serviço: </strong> {item.service}<br/>
-                  <strong>Descrição: </strong> <p>{item.description} </p> 
-                  <button onClick={() => removeInfo(index)}>Remover</button>
-                    {editIndex === index ? (
-                      <button onClick={() => confirmEdit(index)}>Confirmar</button>  
-                    ) : (
-                      <button onClick={() => editInfo(index)}>Editar</button>
-                    )}
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+      <ul>
+        {/* Mapeando a lista de itens */}
+        {lista.map((item, index) => (
+          <li key={index}>
+            <strong>Serviço: </strong> {item.service}
+            <br />
+            <strong>Status: </strong> {item.status}
+            <br />
+            {/* Verificando se a descrição do item está expandida */}
+            {item.expanded && (
+              <>
+                <strong>Descrição: </strong>
+                <p>{item.description}</p>
+                <button onClick={() => removeInfo(index)}>Remover</button>
+                {/* Verificando se o item está sendo editado */}
+                {editIndex === index ? (
+                  <div className="Status">
+                    <label>
+                      Incompleto
+                      <input
+                        type="radio"
+                        checked={editStatus === "incompleto"}
+                        value="incompleto"
+                        onChange={handleStatusChange}
+                      />
+                    </label>
+                    <label>
+                      Em Andamento
+                      <input
+                        type="radio"
+                        checked={editStatus === "em andamento"}
+                        value="em andamento"
+                        onChange={handleStatusChange}
+                      />
+                    </label>
+                    <label>
+                      Concluído
+                      <input
+                        type="radio"
+                        checked={editStatus === "concluído"}
+                        value="concluído"
+                        onChange={handleStatusChange}
+                      />
+                    </label>
+                    <br />
+                    <label>
+                      Editar Serviço:
+                      <input
+                        type="text"
+                        value={editService}
+                        onChange={(e) => setEditService(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      Editar Descrição:
+                      <input
+                        type="text"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                      />
+                    </label>
+                    <button onClick={confirmEdit}>Confirmar</button>
+                  </div>
+                ) : (
+                  // Botão editar para o item
+                  <button onClick={() => editInfo(index)}>Editar</button>
+                )}
+              </>
+            )}
+            {/* Botão para expandir/recolher a descrição do item */}
+            <button onClick={() => toggleDescription(index)}>
+              {item.expanded ? "Recolher" : "Expandir"}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
